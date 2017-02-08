@@ -71,8 +71,6 @@ endif()
 
 set(DEVKIT "${MAYA_LOCATION}/devkit")
 set(DEVKIT_INCLUDE "${MAYA_LOCATION}/include")
-set(DEVKIT_ALEMBIC_INCDIR "${DEVKIT}/Alembic/include")
-set(DEVKIT_ALEMBIC_LIBDIR "${DEVKIT}/Alembic/lib")
 
 # Add project sources
 add_subdirectory(src)
@@ -86,7 +84,10 @@ include_directories(
 
 set(EXECUTABLE_NAME "maya_standalone_test_app")
 add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
+
+# Link the executable to the libraries
 link_directories(${MAYA_LIBRARY_DIR})
 target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
+MAYA_PLUGIN(${PROJECT_NAME})
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
