@@ -109,3 +109,12 @@ function(MAYA_PLUGIN _target)
         PREFIX ""
         SUFFIX ${MAYA_PLUGIN_EXTENSION})
 endfunction()
+
+function(MAYA_STANDALONE_EXE _target)
+    set_target_properties(${_target} PROPERTIES
+        LINK_FLAGS "/export:initializePlugin /export:uninitializePlugin"
+        COMPILE_DEFINITIONS "${MAYA_COMPILE_DEFINITIONS}"
+        PREFIX ""
+        SUFFIX ${MAYA_PLUGIN_EXTENSION}
+    )
+endfunction()

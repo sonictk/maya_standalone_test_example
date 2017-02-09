@@ -8,24 +8,24 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 # Set compiler flags for each platform
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # Using Clang on XCode
-    set(CMAKE_C_FLAGS "-DBits64_"
-                      "-m64"
-                      "-DUNIX"
-                      "-D_BOOL"
-                      "-DLINUX"
-                      "-DFUNCPROTO"
-                      "-D_GNU_SOURCE"
-                      "-DLINUX_64"
-                      "-fPIC"
-                      "-fno-strict-aliasing"
-                      "-DREQUIRE_IOSTREAM"
-                      "-O3"
-                      "-Wall"
-                      "-Wno-multichar"
-                      "-Wno-comment"
-                      "-Wno-sign-compare"
-                      "-funsigned-char"
-                      "-pthread")
+    set(CMAKE_C_FLAGS "-DBits64_ \
+                      -m64 \
+                      -DUNIX \
+                      -D_BOOL \
+                      -DLINUX \
+                      -DFUNCPROTO \
+                      -D_GNU_SOURCE \
+                      -DLINUX_64 \
+                      -fPIC \
+                      -fno-strict-aliasing \
+                      -DREQUIRE_IOSTREAM \
+                      -O3 \
+                      -Wall \
+                      -Wno-multichar \
+                      -Wno-comment \
+                      -Wno-sign-compare \
+                      -funsigned-char \
+                      -pthread")
     set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} \
                         -Wall \
                         -Wno-deprecated \
@@ -88,6 +88,6 @@ add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
 # Link the executable to the libraries
 link_directories(${MAYA_LIBRARY_DIR})
 target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
-MAYA_PLUGIN(${PROJECT_NAME})
+MAYA_STANDALONE_EXE(${PROJECT_NAME})
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
