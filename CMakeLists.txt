@@ -5,6 +5,9 @@ project(${PROJECT_NAME})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 
+# Attempt to find existing installation of Maya and define variables
+find_package(Maya REQUIRED)
+
 # Set compiler flags for each platform
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # Using Clang on XCode
@@ -55,7 +58,6 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
                       -funsigned-char \
                       -pthread")
     set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} \
-                        -Wall \
                         -Wno-deprecated \
                         -Wno-reorder \
                         -ftemplate-depth-25 \
@@ -69,14 +71,10 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS_DEBUG "/MP /ZI /EHsc")
 endif()
 
-set(DEVKIT "${MAYA_LOCATION}/devkit")
-set(DEVKIT_INCLUDE "${MAYA_LOCATION}/include")
-
 # Add project sources
 add_subdirectory(src)
 
-find_package(Maya REQUIRED)
-
+# Add include search paths
 include_directories(
   ${MAYA_INCLUDE_DIR}
   ${PROJECT_SOURCE_DIR}/include
@@ -88,6 +86,5 @@ add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
 # Link the executable to the libraries
 link_directories(${MAYA_LIBRARY_DIR})
 target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
-MAYA_STANDALONE_EXE(${PROJECT_NAME})
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
