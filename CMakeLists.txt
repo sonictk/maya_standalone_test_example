@@ -80,6 +80,9 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include
 )
 
+# Disable RPATH stripping during installation so that the binary will link correctly
+# to the Maya libs 
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(EXECUTABLE_NAME "maya_standalone_test_app")
 add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
 
