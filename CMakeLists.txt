@@ -80,6 +80,8 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include
 )
 
+# Don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
 # Disable RPATH stripping during installation so that the binary will link correctly
 # to the Maya libs 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
