@@ -24,6 +24,6 @@ program.
 ### Instructions for building with CMake
 
 * Create a ``build`` directory and navigate to it. 
-* Run ``cmake ../ -DCMAKE_RELEASE_TYPE=Release`` and then ``cmake --build .
+* Run ``cmake ../ -DCMAKE_BUILD_TYPE=Release`` and then ``cmake --build .
   --config Release --target install``. The binary should be installed in the
   ``bin`` folder.
