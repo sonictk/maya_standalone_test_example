@@ -16,8 +16,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
                         -fpascal-strings \
                         -O3 \
                         -Wall, \
-                        -executable_path ${MAYA_LOCATION}/MacOS \
-                        -F${MAYA_LOCATION}/Frameworks \
+                        -executable_path ${MAYA_LOCATION}/Maya.app/Contents/MacOS \
+                        -F${MAYA_LOCATION}/Maya.app/Contents/Frameworks \
                         -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
                         -headerpad_max_install_names \
                         -dynamic")
