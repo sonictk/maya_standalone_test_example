@@ -19,6 +19,7 @@ include_directories(
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Detected compiler as Clang on OSX...")
     # Using Clang on XCode
+    set(CMAKE_FRAMEWORK_PATH "")
     set(CMAKE_CXX_FLAGS "-stdlib=libstdc++ \
                         -std=c++0x \
                         -fno-gnu-keywords \
