@@ -16,7 +16,7 @@ include_directories(
 )
 
 # Set compiler flags for each platform
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Detected compiler as Clang on OSX...")
     # Using Clang on XCode
     set(CMAKE_FRAMEWORK_PATH "")
@@ -25,14 +25,20 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
                         -fno-gnu-keywords \
                         -fpascal-strings \
                         -O3 \
-                        -Wl,-executable_path,${MAYA_LOCATION}/Maya.app/Contents/MacOS \
-                        -F${MAYA_LOCATION}/Maya.app/Contents/Frameworks \
-                        -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
-                        -headerpad_max_install_names \
                         -dynamic")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -ggdb -glldb")
+    set(CMAKE_EXE_LINKER_FLAGS "-stdlib=libstdc++ \
+                                -std=c++0x \
+                                -fno-gnu-keywords \
+                                -fpascal-strings \
+                                -O3 \
+                                -Wl,-executable_path,${MAYA_LOCATION}/Maya.app/Contents/MacOS \
+                                -F${MAYA_LOCATION}/Maya.app/Contents/Frameworks \
+                                -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
+                                -headerpad_max_install_names \
+                                -dynamic")
 
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC on Linux
     set(CMAKE_C_FLAGS "-DBits64_ \
                       -m64 \
@@ -59,7 +65,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
                         -fno-gnu-keywords")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -ggdb")
 
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # using Visual Studio C++
     # TODO: Need to find the compiler flags for Visual Studio compiler
     set(CMAKE_CXX_FLAGS "/MP")
@@ -69,11 +75,17 @@ endif()
 # Add project sources
 add_subdirectory(src)
 
-# Don't skip the full RPATH for the build tree
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
+if(APPLE)
+    message(STATUS "Setting OSX to use RPATH")
+    set(CMAKE_MACOSX_RPATH TRUE)
+    set(CMAKE_INSTALL_RPATH "${MAYA_LIBRARY_DIR}")
+endif()
+# Don't skip the full RPATH for the build/install tree
+set(CMAKE_SKIP_RPATH FALSE)
 # Disable RPATH stripping during installation so that the binary will link correctly
 # to the Maya libs
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 set(EXECUTABLE_NAME ${PROJECT_NAME})
 add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
 
@@ -82,6 +94,7 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
     COMPILE_DEFINITIONS "${MAYA_COMPILE_DEFINITIONS}")
 
 # Link the executable to the libraries
+message(STATUS "Linking to Maya libraries at: ${MAYA_LIBRARY_DIR}")
 link_directories(${MAYA_LIBRARY_DIR})
 target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
 
