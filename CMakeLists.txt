@@ -11,30 +11,16 @@ find_package(Maya REQUIRED)
 # Set compiler flags for each platform
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # Using Clang on XCode
-    set(CMAKE_C_FLAGS "-DBits64_ \
-                      -m64 \
-                      -DUNIX \
-                      -D_BOOL \
-                      -DLINUX \
-                      -DFUNCPROTO \
-                      -D_GNU_SOURCE \
-                      -DLINUX_64 \
-                      -fPIC \
-                      -fno-strict-aliasing \
-                      -DREQUIRE_IOSTREAM \
-                      -O3 \
-                      -Wall \
-                      -Wno-multichar \
-                      -Wno-comment \
-                      -Wno-sign-compare \
-                      -funsigned-char \
-                      -pthread")
-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} \
-                        -Wall \
-                        -Wno-deprecated \
-                        -Wno-reorder \
-                        -ftemplate-depth-25 \
-                        -fno-gnu-keywords")
+    set(CMAKE_CXX_FLAGS "-stdlib=libstdc++ \
+                        -fno-gnu-keywords \
+                        -fpascal-strings \
+                        -O3 \
+                        -Wall, \
+                        -executable_path ${MAYA_LOCATION}/MacOS \
+                        -F${MAYA_LOCATION}/Frameworks \
+                        -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
+                        -headerpad_max_install_names \
+                        -dynamic")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -ggdb -glldb")
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -83,7 +69,7 @@ include_directories(
 # Don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 # Disable RPATH stripping during installation so that the binary will link correctly
-# to the Maya libs 
+# to the Maya libs
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(EXECUTABLE_NAME "maya_standalone_test_app")
 add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
