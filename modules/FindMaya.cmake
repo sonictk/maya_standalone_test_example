@@ -86,6 +86,7 @@ if(WIN32)
     # TODO: Check on Windows if this works for MSVC
     set(_MAYA_LIBRARIES OpenMaya OpenMayaAnim OpenMayaFX OpenMayaRender OpenMayaUI Foundation clew OpenMayalib OpenMaya AnimSlice DeformSlice Modifiers DynSlice KinSlice ModelSlice NurbsSlice PolySlice ProjectSlice Image Shared Translators DataModel RenderModel NurbsEngine DependEngine CommandEngine Foundation IMFbase
     )
+
 elseif(APPLE)
     # Apple
     set(_MAYA_LIBRARIES OpenMaya OpenMayaAnim OpenMayaFX OpenMayaRender OpenMayaUI Foundation clew OpenMayalib OpenMaya AnimSlice DeformSlice Modifiers DynSlice KinSlice ModelSlice NurbsSlice PolySlice ProjectSlice Image Shared Translators DataModel RenderModel NurbsEngine DependEngine CommandEngine Foundation IMFbase
@@ -96,6 +97,7 @@ else()
     set(_MAYA_LIBRARIES OpenMaya OpenMayaAnim OpenMayaFX OpenMayaRender OpenMayaUI Foundation clew OpenMayalib OpenMaya AnimSlice DeformSlice Modifiers DynSlice KinSlice ModelSlice NurbsSlice PolySlice ProjectSlice Image Shared Translators DataModel RenderModel NurbsEngine DependEngine CommandEngine Foundation IMFbase m dl
     )
 endif()
+
 foreach(MAYA_LIB ${_MAYA_LIBRARIES})
     find_library(MAYA_${MAYA_LIB}_LIBRARY NAMES ${MAYA_LIB} PATHS ${MAYA_LIBRARY_DIR}
         NO_DEFAULT_PATH)

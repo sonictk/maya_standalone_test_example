@@ -8,15 +8,23 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 # Attempt to find existing installation of Maya and define variables
 find_package(Maya REQUIRED)
 
+
+# Add include search paths
+include_directories(
+  ${MAYA_INCLUDE_DIR}
+  ${PROJECT_SOURCE_DIR}/include
+)
+
 # Set compiler flags for each platform
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(STATUS "Detected compiler as Clang on OSX...")
     # Using Clang on XCode
     set(CMAKE_CXX_FLAGS "-stdlib=libstdc++ \
+                        -std=c++0x \
                         -fno-gnu-keywords \
                         -fpascal-strings \
                         -O3 \
-                        -Wall, \
-                        -executable_path ${MAYA_LOCATION}/Maya.app/Contents/MacOS \
+                        -Wl,-executable_path,${MAYA_LOCATION}/Maya.app/Contents/MacOS \
                         -F${MAYA_LOCATION}/Maya.app/Contents/Frameworks \
                         -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
                         -headerpad_max_install_names \
@@ -24,7 +32,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -ggdb -glldb")
 
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # using GCC
+    # using GCC on Linux
     set(CMAKE_C_FLAGS "-DBits64_ \
                       -m64 \
                       -DUNIX \
@@ -60,19 +68,17 @@ endif()
 # Add project sources
 add_subdirectory(src)
 
-# Add include search paths
-include_directories(
-  ${MAYA_INCLUDE_DIR}
-  ${PROJECT_SOURCE_DIR}/include
-)
-
 # Don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 # Disable RPATH stripping during installation so that the binary will link correctly
 # to the Maya libs
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(EXECUTABLE_NAME "maya_standalone_test_app")
+set(EXECUTABLE_NAME ${PROJECT_NAME})
 add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
+
+# Set preprocessor definitions
+set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+    COMPILE_DEFINITIONS "${MAYA_COMPILE_DEFINITIONS}")
 
 # Link the executable to the libraries
 link_directories(${MAYA_LIBRARY_DIR})
