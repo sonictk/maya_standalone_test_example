@@ -1,5 +1,6 @@
 # CMake 2.8.11 and above required for linking to qtmain.lib library on Windows
-cmake_minimum_required(VERSION 2.8.11)
+# CMake 2.8.12 and above required for MACOSX_RPATH property
+cmake_minimum_required(VERSION 2.8.12)
 set(PROJECT_NAME "maya_standalone_test")
 project(${PROJECT_NAME})
 
@@ -7,7 +8,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/modules)
 
 # Attempt to find existing installation of Maya and define variables
 find_package(Maya REQUIRED)
-
 
 # Add include search paths
 include_directories(
@@ -32,7 +32,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
                                 -fno-gnu-keywords \
                                 -fpascal-strings \
                                 -O3 \
-                                -Wl,-executable_path,${MAYA_LOCATION}/Maya.app/Contents/MacOS \
+                                -Wl, \
                                 -F${MAYA_LOCATION}/Maya.app/Contents/Frameworks \
                                 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
                                 -headerpad_max_install_names \
@@ -75,16 +75,19 @@ endif()
 # Add project sources
 add_subdirectory(src)
 
-if(APPLE)
-    message(STATUS "Setting OSX to use RPATH")
-    set(CMAKE_MACOSX_RPATH TRUE)
-    set(CMAKE_INSTALL_RPATH "${MAYA_LIBRARY_DIR}")
-endif()
 # Don't skip the full RPATH for the build/install tree
 set(CMAKE_SKIP_RPATH FALSE)
-# Disable RPATH stripping during installation so that the binary will link correctly
-# to the Maya libs
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+if(APPLE)
+    message (STATUS "Setting OSX-specific RPATH settings...")
+    set(CMAKE_INSTALL_RPATH "${MAYA_LIBRARY_DIR}")
+    set(CMAKE_INSTALL_NAME_DIR "@rpath")
+else()
+    # Disable RPATH stripping during installation so that the binary will link correctly
+    # to the Maya libs
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif(APPLE)
 
 set(EXECUTABLE_NAME ${PROJECT_NAME})
 add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
@@ -95,7 +98,7 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
 
 # Link the executable to the libraries
 message(STATUS "Linking to Maya libraries at: ${MAYA_LIBRARY_DIR}")
-link_directories(${MAYA_LIBRARY_DIR})
+# link_directories(${MAYA_LIBRARY_DIR})
 target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/bin)
