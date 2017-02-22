@@ -2,6 +2,12 @@
 # CMake 2.8.12 and above required for MACOSX_RPATH property
 cmake_minimum_required(VERSION 2.8.12)
 set(PROJECT_NAME "maya_standalone_test")
+
+if(APPLE)
+    message(STATUS "Setting MacOSX SDK...")
+    set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk")
+endif(APPLE)
+
 project(${PROJECT_NAME})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/modules)
@@ -15,11 +21,16 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/include
 )
 
+if(APPLE)
+    message(STATUS "Setting OSX Framework path to: ${MAYA_LOCATION}/Maya.app/Contents/Frameworks")
+    set(CMAKE_FIND_FRAMEWORK FIRST)
+    set(CMAKE_FRAMEWORK_PATH "${MAYA_LOCATION}/Maya.app/Contents/Frameworks")
+endif(APPLE)
+
 # Set compiler flags for each platform
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    message(STATUS "Detected compiler as Clang on OSX...")
-    # Using Clang on XCode
-    set(CMAKE_FRAMEWORK_PATH "")
+    message(STATUS "Detected compiler as Clang...")
+    # Using Clang 
     set(CMAKE_CXX_FLAGS "-stdlib=libstdc++ \
                         -std=c++0x \
                         -fno-gnu-keywords \
@@ -33,8 +44,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
                                 -fpascal-strings \
                                 -O3 \
                                 -Wl, \
-                                -F${MAYA_LOCATION}/Maya.app/Contents/Frameworks \
-                                -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
                                 -headerpad_max_install_names \
                                 -dynamic")
 
@@ -67,7 +76,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # using Visual Studio C++
-    # TODO: Need to find the compiler flags for Visual Studio compiler
+    # TODO: Need to find the compiler flags 
     set(CMAKE_CXX_FLAGS "/MP")
     set(CMAKE_CXX_FLAGS_DEBUG "/MP /ZI /EHsc")
 endif()
@@ -80,7 +89,7 @@ set(CMAKE_SKIP_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 if(APPLE)
-    message (STATUS "Setting OSX-specific RPATH settings...")
+    message (STATUS "Setting OSX-specific settings...")
     set(CMAKE_INSTALL_RPATH "${MAYA_LIBRARY_DIR}")
     set(CMAKE_INSTALL_NAME_DIR "@rpath")
 else()
@@ -98,7 +107,6 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
 
 # Link the executable to the libraries
 message(STATUS "Linking to Maya libraries at: ${MAYA_LIBRARY_DIR}")
-# link_directories(${MAYA_LIBRARY_DIR})
 target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/bin)
