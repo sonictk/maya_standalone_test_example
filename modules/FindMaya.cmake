@@ -83,7 +83,6 @@ find_path(MAYA_INCLUDE_DIR maya/MFn.h
 # Maya libraries
 if(WIN32)
     # Windows
-    # TODO: Check on Windows if this works for MSVC
     set(_MAYA_LIBRARIES OpenMaya OpenMayaAnim OpenMayaFX OpenMayaRender OpenMayaUI Foundation clew OpenMayalib OpenMaya AnimSlice DeformSlice Modifiers DynSlice KinSlice ModelSlice NurbsSlice PolySlice ProjectSlice Image Shared Translators DataModel RenderModel NurbsEngine DependEngine CommandEngine Foundation IMFbase
     )
 
