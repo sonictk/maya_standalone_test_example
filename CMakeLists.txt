@@ -30,7 +30,7 @@ endif(APPLE)
 # Set compiler flags for each platform
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(STATUS "Detected compiler as Clang...")
-    # Using Clang 
+    # Using Clang
     set(CMAKE_CXX_FLAGS "-stdlib=libstdc++ \
                         -std=c++0x \
                         -fno-gnu-keywords \
@@ -76,9 +76,8 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # using Visual Studio C++
-    # TODO: Need to find the compiler flags 
-    set(CMAKE_CXX_FLAGS "/MP")
-    set(CMAKE_CXX_FLAGS_DEBUG "/MP /ZI /EHsc")
+    set(CMAKE_CXX_FLAGS "/MP /GR /GS /W3 /Gy /Zc:wchar_t /Zc:forScope /Gm /O2 /Ob1 /fp:precise /GF /WX /nologo")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} /ZI /EHsc")
 endif()
 
 # Add project sources
@@ -109,4 +108,15 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
 message(STATUS "Linking to Maya libraries at: ${MAYA_LIBRARY_DIR}")
 target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
 
-install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/bin)
+install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+# If on Windows, copy over all the DLLs necessary for the standalone app to dynamically link against
+if(WIN32)
+    file(GLOB MAYA_DLLS "${MAYA_LOCATION}/bin/*.dll")
+    foreach(DLL_FILE ${MAYA_DLLS})
+        add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DLL_FILE}" "${CMAKE_INSTALL_PREFIX}"
+            COMMENT "Copying ${DLL_FILE} to installation directory...")
+    endforeach(DLL_FILE)
+endif(WIN32)
