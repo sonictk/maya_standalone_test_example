@@ -20,11 +20,15 @@ include_directories(
   ${MAYA_INCLUDE_DIR}
   ${PROJECT_SOURCE_DIR}/include
 )
+message(STATUS "Including Maya headers from: ${MAYA_INCLUDE_DIR}")
+message(STATUS "Including project headers from: ${PROJECT_SOURCE_DIR}/include")
 
 if(APPLE)
-    message(STATUS "Setting OSX Framework path to: ${MAYA_LOCATION}/Maya.app/Contents/Frameworks")
+    set(MAYA_FRAMEWORK_DIR "${MAYA_LOCATION}/Maya.app/Contents/Frameworks")
+    message(STATUS "Setting OSX Framework path to: ${MAYA_FRAMEWORK_DIR}")
+    set(CMAKE_MACOSX_RPATH TRUE)
     set(CMAKE_FIND_FRAMEWORK FIRST)
-    set(CMAKE_FRAMEWORK_PATH "${MAYA_LOCATION}/Maya.app/Contents/Frameworks")
+    set(CMAKE_FRAMEWORK_PATH "${MAYA_FRAMEWORK_DIR}")
 endif(APPLE)
 
 # Set compiler flags for each platform
@@ -35,9 +39,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
                         -std=c++0x \
                         -fno-gnu-keywords \
                         -fpascal-strings \
+                        -pthread \
                         -O3 \
                         -dynamic")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -ggdb -glldb")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -gdwarf-4 -gmodules")
     set(CMAKE_EXE_LINKER_FLAGS "-stdlib=libstdc++ \
                                 -std=c++0x \
                                 -fno-gnu-keywords \
@@ -89,13 +94,13 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 if(APPLE)
     message (STATUS "Setting OSX-specific settings...")
+    set(CMAKE_INSTALL_NAME_DIR "${MAYA_LIBRARY_DIR}")
     set(CMAKE_INSTALL_RPATH "${MAYA_LIBRARY_DIR}")
-    set(CMAKE_INSTALL_NAME_DIR "@rpath")
-else()
-    # Disable RPATH stripping during installation so that the binary will link correctly
-    # to the Maya libs
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif(APPLE)
+
+# Disable RPATH stripping during installation so that the binary will link correctly
+# to the Maya libs
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(EXECUTABLE_NAME ${PROJECT_NAME})
 add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
@@ -119,4 +124,17 @@ if(WIN32)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DLL_FILE}" "${CMAKE_INSTALL_PREFIX}"
             COMMENT "Copying ${DLL_FILE} to installation directory...")
     endforeach(DLL_FILE)
-endif(WIN32)
+
+# If on OSX, since @rpath linking/framework linking is horrendously overcomplicated, copy over the .dylibs 
+# and framework files to the application directory as well
+elseif(APPLE)
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${MAYA_LIBRARY_DIR}" "${CMAKE_INSTALL_PREFIX}"
+        COMMENT "Copying ${MAYA_LIBRARY_DIR} to installation directory...")
+
+    get_filename_component(INSTALL_PARENT_DIR ${CMAKE_INSTALL_PREFIX} DIRECTORY)
+    set(FRAMEWORKS_INSTALL_DIR "${INSTALL_PARENT_DIR}/Frameworks")
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${MAYA_FRAMEWORK_DIR}" "${FRAMEWORKS_INSTALL_DIR}"
+        COMMENT "Copying ${MAYA_FRAMEWORK_DIR} to ${FRAMEWORKS_INSTALL_DIR}...")
+endif()
