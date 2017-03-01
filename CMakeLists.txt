@@ -94,8 +94,8 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
 if(APPLE)
     message (STATUS "Setting OSX-specific settings...")
-    set(CMAKE_INSTALL_NAME_DIR "${MAYA_LIBRARY_DIR}")
-    set(CMAKE_INSTALL_RPATH "${MAYA_LIBRARY_DIR}")
+    set(CMAKE_INSTALL_NAME_DIR "@rpath")
+    set(CMAKE_INSTALL_RPATH "${MAYA_LIBRARY_DIR};${MAYA_FRAMEWORK_DIR}")
 endif(APPLE)
 
 # Disable RPATH stripping during installation so that the binary will link correctly
