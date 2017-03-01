@@ -128,9 +128,42 @@ if(WIN32)
 # If on OSX, since @rpath linking/framework linking is horrendously overcomplicated, copy over the .dylibs 
 # and framework files to the application directory as well
 elseif(APPLE)
+    file(GLOB MAYA_DYLIBS 
+        "${MAYA_LIBRARY_DIR}/*.dylib"
+        "${MAYA_LIBRARY_DIR}/QtCore"
+        "${MAYA_LIBRARY_DIR}/QtDeclarative"
+        "${MAYA_LIBRARY_DIR}/QtCore"
+        "${MAYA_LIBRARY_DIR}/QtMultimedia"
+        "${MAYA_LIBRARY_DIR}/QtHelp"
+        "${MAYA_LIBRARY_DIR}/QtGui"
+        "${MAYA_LIBRARY_DIR}/QtDesignerComponents"
+        "${MAYA_LIBRARY_DIR}/QtDesigner"
+        "${MAYA_LIBRARY_DIR}/QtSvg"
+        "${MAYA_LIBRARY_DIR}/QtSql"
+        "${MAYA_LIBRARY_DIR}/QtScriptTools"
+        "${MAYA_LIBRARY_DIR}/QtScript"
+        "${MAYA_LIBRARY_DIR}/QtOpenGL"
+        "${MAYA_LIBRARY_DIR}/QtNetwork"
+        "${MAYA_LIBRARY_DIR}/shiboken"
+        "${MAYA_LIBRARY_DIR}/Render"
+        "${MAYA_LIBRARY_DIR}/QtXmlPatterns"
+        "${MAYA_LIBRARY_DIR}/QtXml"
+        "${MAYA_LIBRARY_DIR}/QtWebKit"
+        "${MAYA_LIBRARY_DIR}/phonon")
+    foreach(DYLIB ${MAYA_DYLIBS})
+        add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E 
+            copy_if_different "${DYLIB}" "${CMAKE_INSTALL_PREFIX}"
+            COMMENT "Copying ${DYLIB} to installation directory...")
+    endforeach()
+
     add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${MAYA_LIBRARY_DIR}" "${CMAKE_INSTALL_PREFIX}"
-        COMMENT "Copying ${MAYA_LIBRARY_DIR} to installation directory...")
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${MAYA_LIBRARY_DIR}/plug-ins" "${CMAKE_INSTALL_PREFIX}/plug-ins"
+        COMMENT "Copying Maya plug-ins to installation directory...")
+
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${MAYA_LIBRARY_DIR}/rendererDesc" "${CMAKE_INSTALL_PREFIX}/rendererDesc"
+        COMMENT "Copying Maya renderer XML configuration files to installation directory...")
 
     get_filename_component(INSTALL_PARENT_DIR ${CMAKE_INSTALL_PREFIX} DIRECTORY)
     set(FRAMEWORKS_INSTALL_DIR "${INSTALL_PARENT_DIR}/Frameworks")
