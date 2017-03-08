@@ -116,14 +116,14 @@ target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/bin)
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
-# If on Windows, copy over all the DLLs necessary for the standalone app to dynamically link against
+# For standalone linking, run post-build commands to copy necessary dylibs/OSX frameworks 
+# to the executable folder
+# If on Windows, because there is extra stuff in Python that relies on the Maya libs directory specifically, 
+# create the .bat file for setting the environment for end-users to run the tests with
 if(WIN32)
-    file(GLOB MAYA_DLLS "${MAYA_LOCATION}/bin/*.dll")
-    foreach(DLL_FILE ${MAYA_DLLS})
-        add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DLL_FILE}" "${CMAKE_INSTALL_PREFIX}"
-            COMMENT "Copying ${DLL_FILE} to installation directory...")
-    endforeach(DLL_FILE)
+    file(TO_NATIVE_PATH ${MAYA_LOCATION} MAYA_LOCATION_WIN)
+    configure_file("${PROJECT_SOURCE_DIR}/src/launch_maya_standalone_test.bat.in"
+                   "${CMAKE_INSTALL_PREFIX}/launch_maya_standalone_test.bat" NEWLINE_STYLE CRLF)
 
 # If on OSX, since @rpath linking/framework linking is horrendously overcomplicated, copy over the .dylibs 
 # and framework files to the application directory as well

@@ -1,0 +1,3 @@
+set PATH=@MAYA_LOCATION_WIN@\bin;%PATH%
+set MAYA_LOCATION=@MAYA_LOCATION_WIN@
+start "maya_standalone_test" %~dp0\maya_standalone_test.exe
