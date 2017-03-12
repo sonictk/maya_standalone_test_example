@@ -1,93 +1,90 @@
 /**
  * @brief  	This is a program that reads in a given list of Maya scene files
  * 			and writes out their contents to the terminal.
- *
  */
-
+#include <maya/MFnDependencyNode.h>
+#include <maya/MFileIO.h>
+#include <maya/MIOStream.h>
+#include <maya/MGlobal.h>
+#include <maya/MItDag.h>
+#include <maya/MLibrary.h>
+#include <maya/MObject.h>
 #include <maya/MStatus.h>
 #include <maya/MString.h>
-#include <maya/MFileIO.h>
-#include <maya/MLibrary.h>
-#include <maya/MIOStream.h>
+#include <stdio.h>
 #include <string.h>
 
-const char* helpText = "usage: [-h/help] readAndWrite fileName1 fileName2 ...\n\
-       Each specified file will be loaded and the transform nodes in the scene \
-       will be printed out.\n";
+const char *helpText = "usage: [-h/help] readAndWrite fileName1 fileName2 ...\n"
+					   "Each specified file will be loaded and the transform nodes "
+					   "in the scene will be printed out.\n";
 
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
-	MStatus stat;
-
-	argc--, argv++;
-
-	if (argc == 0) {
+	// Help flag
+	if (argc == 1)
+	{
 		std::cout << helpText << std::endl;;
-		return(1);
+		return 0;
 	}
-
-	for (; argc && argv[0][0] == '-'; argc--, argv++) {
-		if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "-help")) {
-			cerr << helpText;
-			return(1);
-		}
-
-		if (argv[0][0] == '-') {
-			// Unknown flag
-			cerr << helpText;
-			return(1);
+	for (int i=1; i < argc; i++)
+	{
+		if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help") || (argv[i][0] == '-'))
+		{
+			std::cout << helpText << std::endl;
+			return 0;
 		}
 	}
 
-	stat = MLibrary::initialize (argv[0]);
+	// Else start the Maya standalone session
+	std::cout << "Initializing Maya libraries..." << std::endl;
+
+	MStatus stat = MLibrary::initialize(true, argv[0], true);
 	if (!stat) {
-		stat.perror("MLibrary::initialize");
+		stat.perror("Failed to initialize standalone Maya libraries!");
 		return 1;
 	}
 
-	for (; argc; argc--, argv++) {
-		MString	fileName(argv[0]);
-		MString fileType;
-
-		MFileIO::newFile(true);
-
-		cerr << "Loading \"" << fileName << "\" ... ";
-		// Load the file into Maya
-		stat = MFileIO::open(fileName);
-		if ( !stat ) {
-			stat.perror(fileName.asChar());
+	for (int i=1; i < argc; i++) {
+		// Check if the file can be opened
+		char *fileName = argv[i];
+		FILE *fp = fopen(fileName, "r");
+		if (!fp)
+		{
+			std::cerr << "File does not exist on disk: " << fileName << std::endl;
 			continue;
 		}
-		cerr << " done.\n";
+		else
+		{
+			std::cout << "Loading \"" << fileName << "\" ... " << std::endl;
+			fclose(fp);
+		}
+		MFileIO::newFile(true);
 
-		// Get the file type
-		fileType = MFileIO::fileType();
-
-		// Don't overwrite the existing file
-		MString newFile;
-
-		// Find the extension if one exists
-		int loc = fileName.rindex('.');
-		if (loc == -1) {
-			newFile = fileName + ".updated";
-		} else {
-			newFile = fileName.substring(0, loc-1);
-			newFile += ".updated";
-			newFile += fileName.substring(loc, fileName.length()-1);
+		// Load the file into Maya
+		stat = MFileIO::open(fileName);
+		if (!stat) {
+			stat.perror("Error while opening file!");
+			continue;
 		}
 
-		stat = MFileIO::saveAs(newFile, fileType.asChar());
-		cerr << "    ";
-		if (stat) {
-			cerr << "resaved as "
-			     << MFileIO::currentFile()
-				 << endl;
-		} else {
-			stat.perror(newFile.asChar());
+		// Find all the mesh nodes in the scene and print the result to the
+		// terminal
+		MItDag itDag;
+		for (; !itDag.isDone(); itDag.next())
+		{
+			MObject curItem = itDag.currentItem();
+			MFnDependencyNode fnNode;
+			if (curItem.apiType() == MFn::kMesh)
+			{
+				fnNode.setObject(curItem);
+				MGlobal::displayInfo(fnNode.name());
+			}
 		}
 	}
 
+	// Need to exit Maya cleanly and de-allocate all Maya structures.
+	// By default, this also terminates the application.
 	MLibrary::cleanup();
 	return 0;
 }
