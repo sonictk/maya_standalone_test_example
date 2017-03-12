@@ -4,6 +4,7 @@
  */
 #include <maya/MFnDependencyNode.h>
 #include <maya/MFileIO.h>
+#include <maya/MFnNumericAttribute.h>
 #include <maya/MIOStream.h>
 #include <maya/MGlobal.h>
 #include <maya/MItDag.h>
@@ -68,13 +69,13 @@ int main(int argc, char *argv[])
 			continue;
 		}
 
-		// Find all the mesh nodes in the scene and print the result to the
-		// terminal
+		// Find all the mesh nodes in the scene and write their names to the console
 		MItDag itDag;
 		for (; !itDag.isDone(); itDag.next())
 		{
 			MObject curItem = itDag.currentItem();
 			MFnDependencyNode fnNode;
+			MFnNumericAttribute fnNumAttr;
 			if (curItem.apiType() == MFn::kMesh)
 			{
 				fnNode.setObject(curItem);
