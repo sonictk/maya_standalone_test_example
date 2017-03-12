@@ -88,6 +88,9 @@ endif()
 # Add project sources
 add_subdirectory(src)
 
+# Add test sources
+add_subdirectory(tests)
+
 # Don't skip the full RPATH for the build/install tree
 set(CMAKE_SKIP_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
@@ -103,18 +106,21 @@ endif(APPLE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 set(EXECUTABLE_NAME ${PROJECT_NAME})
+set(TEST_EXECUTABLE_NAME "unittests_${PROJECT_NAME}")
 add_executable (${EXECUTABLE_NAME} ${PROJECT_SOURCES})
+add_executable (${TEST_EXECUTABLE_NAME} ${TEST_SOURCES})
 
 # Set preprocessor definitions
-set_target_properties(${EXECUTABLE_NAME} PROPERTIES
+set_target_properties(${EXECUTABLE_NAME} ${TEST_EXECUTABLE_NAME} PROPERTIES
     COMPILE_DEFINITIONS "${MAYA_COMPILE_DEFINITIONS}")
 
 # Link the executable to the libraries
 message(STATUS "Linking to Maya libraries at: ${MAYA_LIBRARY_DIR}")
 target_link_libraries(${EXECUTABLE_NAME} ${MAYA_LIBRARIES})
+target_link_libraries(${TEST_EXECUTABLE_NAME} ${MAYA_LIBRARIES})
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/bin)
-install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(TARGETS ${EXECUTABLE_NAME} ${TEST_EXECUTABLE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 # For standalone linking, run post-build commands to copy necessary dylibs/OSX frameworks 
 # to the executable folder

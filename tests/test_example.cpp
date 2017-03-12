@@ -35,7 +35,7 @@ TEST_CASE("Test mesh point function", "[maya_standalone_unit_test]")
 	MFileIO::newFile(true);
 	MGlobal::executeCommand("polyCube;");
 	MSelectionList selList;
-	selList.add("polyCubeShape");
+	selList.add("pCubeShape1");
 	MObject node;
 	selList.getDependNode(0, node);
 
