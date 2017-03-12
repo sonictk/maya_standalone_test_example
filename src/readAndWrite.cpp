@@ -1,27 +1,20 @@
-//-
-// ==========================================================================
-// Copyright 1995,2006,2008 Autodesk, Inc. All rights reserved.
-//
-// Use of this software is subject to the terms of the Autodesk
-// license agreement provided at the time of installation or download,
-// or which otherwise accompanies this software in either electronic
-// or hard copy form.
-// ==========================================================================
-//+
+/**
+ * @brief  	This is a program that reads in a given list of Maya scene files
+ * 			and writes out their contents to the terminal.
+ *
+ */
 
 #include <maya/MStatus.h>
-#include <maya/MString.h> 
+#include <maya/MString.h>
 #include <maya/MFileIO.h>
 #include <maya/MLibrary.h>
 #include <maya/MIOStream.h>
 #include <string.h>
 
-const char* usage = "usage: [-h/help] readAndWrite fileName1 fileName2 ...\n\
-       each file will be loaded, the string \".updated\" will be added\n\
-       either at the end of just before the extension, and the file will\n\
-       be written back out again.  If the specified file was created by\n\
-       an old version of Maya, the \"updated\" version will contain the\n\
-       same scene but updated to the current file format.\n";
+const char* helpText = "usage: [-h/help] readAndWrite fileName1 fileName2 ...\n\
+       Each specified file will be loaded and the transform nodes in the scene \
+       will be printed out.\n";
+
 
 int main(int argc, char **argv)
 {
@@ -30,20 +23,19 @@ int main(int argc, char **argv)
 	argc--, argv++;
 
 	if (argc == 0) {
-		cerr << usage;
+		std::cout << helpText << std::endl;;
 		return(1);
 	}
 
 	for (; argc && argv[0][0] == '-'; argc--, argv++) {
 		if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "-help")) {
-			cerr << usage;
+			cerr << helpText;
 			return(1);
 		}
-		// Check for other valid flags
 
 		if (argv[0][0] == '-') {
 			// Unknown flag
-			cerr << usage;
+			cerr << helpText;
 			return(1);
 		}
 	}

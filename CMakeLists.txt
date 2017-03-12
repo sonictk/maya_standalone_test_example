@@ -122,7 +122,7 @@ install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
 # create the .bat file for setting the environment for end-users to run the tests with
 if(WIN32)
     file(TO_NATIVE_PATH ${MAYA_LOCATION} MAYA_LOCATION_WIN)
-    configure_file("${PROJECT_SOURCE_DIR}/src/launch_maya_standalone_test.bat.in"
+    configure_file("${PROJECT_SOURCE_DIR}/scripts/launch_maya_standalone_test.bat.in"
                    "${CMAKE_INSTALL_PREFIX}/launch_maya_standalone_test.bat" NEWLINE_STYLE CRLF)
 
 # If on OSX, since @rpath linking/framework linking is horrendously overcomplicated, copy over the .dylibs 
